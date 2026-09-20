@@ -1,0 +1,566 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: API for the AI Resume Screening & Candidate Matching research prototype.
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: dashboard
+  - name: jobs
+  - name: screening
+  - name: candidates
+  - name: research
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get recruiter dashboard overview
+      responses:
+        "200":
+          description: Dashboard overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /jobs:
+    get:
+      operationId: listJobs
+      tags: [jobs]
+      summary: List saved job descriptions
+      responses:
+        "200":
+          description: Jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+    post:
+      operationId: createJob
+      tags: [jobs]
+      summary: Create a job description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobInput"
+      responses:
+        "201":
+          description: Created job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+  /jobs/{id}:
+    get:
+      operationId: getJob
+      tags: [jobs]
+      summary: Get a job description
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateJob
+      tags: [jobs]
+      summary: Update a job description
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobUpdate"
+      responses:
+        "200":
+          description: Updated job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+    delete:
+      operationId: deleteJob
+      tags: [jobs]
+      summary: Delete a job description
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+  /resumes/upload:
+    post:
+      operationId: uploadResumes
+      tags: [screening]
+      summary: Register resume files for screening
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResumeUploadInput"
+      responses:
+        "201":
+          description: Uploaded resume metadata
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Resume"
+  /screen:
+    post:
+      operationId: runScreening
+      tags: [screening]
+      summary: Run the resume screening pipeline
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScreeningInput"
+      responses:
+        "200":
+          description: Screening results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Screening"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /screenings:
+    get:
+      operationId: listScreenings
+      tags: [screening]
+      summary: List recent screenings
+      responses:
+        "200":
+          description: Screening history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScreeningSummary"
+  /candidates:
+    get:
+      operationId: listCandidates
+      tags: [candidates]
+      summary: List and filter candidates
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: skill
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Candidates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Candidate"
+  /candidates/{id}:
+    get:
+      operationId: getCandidate
+      tags: [candidates]
+      summary: Get candidate details
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Candidate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Candidate"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateCandidateStatus
+      tags: [candidates]
+      summary: Update recruiter candidate status and notes
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CandidateUpdate"
+      responses:
+        "200":
+          description: Updated candidate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Candidate"
+  /explain:
+    post:
+      operationId: explainCandidate
+      tags: [research]
+      summary: Get model explanation for a candidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExplainInput"
+      responses:
+        "200":
+          description: Explanation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Explanation"
+  /fairness:
+    get:
+      operationId: getFairness
+      tags: [research]
+      summary: Get fairness assessment
+      responses:
+        "200":
+          description: Fairness assessment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fairness"
+  /model/metrics:
+    get:
+      operationId: getModelMetrics
+      tags: [research]
+      summary: Get model performance metrics
+      responses:
+        "200":
+          description: Model metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelMetrics"
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string }
+        mode: { type: string }
+    Dashboard:
+      type: object
+      required: [stats, scoreDistribution, statusBreakdown, topSkills, recentScreenings, mode]
+      properties:
+        stats:
+          $ref: "#/components/schemas/DashboardStats"
+        scoreDistribution:
+          type: array
+          items: { $ref: "#/components/schemas/ChartPoint" }
+        statusBreakdown:
+          type: array
+          items: { $ref: "#/components/schemas/ChartPoint" }
+        topSkills:
+          type: array
+          items: { $ref: "#/components/schemas/ChartPoint" }
+        recentScreenings:
+          type: array
+          items: { $ref: "#/components/schemas/Candidate" }
+        mode: { type: string }
+    DashboardStats:
+      type: object
+      required: [totalResumes, screenedCandidates, shortlistedCandidates, averageMatch]
+      properties:
+        totalResumes: { type: number }
+        screenedCandidates: { type: number }
+        shortlistedCandidates: { type: number }
+        averageMatch: { type: number }
+    ChartPoint:
+      type: object
+      required: [label, value]
+      properties:
+        label: { type: string }
+        value: { type: number }
+    Job:
+      type: object
+      required: [id, title, department, requiredSkills, preferredSkills, education, minimumExperience, certifications, description, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        department: { type: string }
+        requiredSkills:
+          type: array
+          items: { type: string }
+        preferredSkills:
+          type: array
+          items: { type: string }
+        education: { type: string }
+        minimumExperience: { type: number }
+        certifications:
+          type: array
+          items: { type: string }
+        description: { type: string }
+        createdAt: { type: string }
+        updatedAt: { type: string }
+    JobInput:
+      type: object
+      required: [title, department, requiredSkills, preferredSkills, education, minimumExperience, certifications, description]
+      properties:
+        title: { type: string, minLength: 1 }
+        department: { type: string }
+        requiredSkills:
+          type: array
+          items: { type: string }
+        preferredSkills:
+          type: array
+          items: { type: string }
+        education: { type: string }
+        minimumExperience: { type: number, minimum: 0 }
+        certifications:
+          type: array
+          items: { type: string }
+        description: { type: string }
+    JobUpdate:
+      allOf:
+        - $ref: "#/components/schemas/JobInput"
+    ResumeUploadInput:
+      type: object
+      required: [resumes]
+      properties:
+        resumes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResumeInput"
+    ResumeInput:
+      type: object
+      required: [filename, text]
+      properties:
+        filename: { type: string }
+        text: { type: string }
+        fileType: { type: string }
+    Resume:
+      type: object
+      required: [id, filename, fileType, status, uploadedAt]
+      properties:
+        id: { type: string }
+        filename: { type: string }
+        fileType: { type: string }
+        status: { type: string }
+        uploadedAt: { type: string }
+    ScreeningInput:
+      type: object
+      required: [jobDescription, resumes]
+      properties:
+        jobId: { type: ["string", "null"] }
+        jobDescription: { type: string, minLength: 1 }
+        resumes:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/ResumeInput"
+    Screening:
+      type: object
+      required: [id, jobTitle, screenedAt, results, mode, pipeline]
+      properties:
+        id: { type: string }
+        jobTitle: { type: string }
+        screenedAt: { type: string }
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/Candidate"
+        mode: { type: string }
+        pipeline:
+          type: array
+          items: { type: string }
+    ScreeningSummary:
+      type: object
+      required: [id, jobTitle, screenedAt, resumeCount, shortlistedCount, averageScore]
+      properties:
+        id: { type: string }
+        jobTitle: { type: string }
+        screenedAt: { type: string }
+        resumeCount: { type: number }
+        shortlistedCount: { type: number }
+        averageScore: { type: number }
+    Candidate:
+      type: object
+      required: [id, name, email, phone, skills, education, experience, certifications, semanticScore, mlScore, overallScore, status, matchedSkills, missingSkills, relatedSkills, explanation, fairness, notes, sourceFile]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        skills:
+          type: array
+          items: { type: string }
+        education: { type: string }
+        experience: { type: number }
+        jobTitles:
+          type: array
+          items: { type: string }
+        certifications:
+          type: array
+          items: { type: string }
+        semanticScore: { type: number }
+        mlScore: { type: number }
+        overallScore: { type: number }
+        status: { type: string }
+        matchedSkills:
+          type: array
+          items: { type: string }
+        missingSkills:
+          type: array
+          items: { type: string }
+        relatedSkills:
+          type: array
+          items: { type: string }
+        explanation: { type: string }
+        fairness:
+          $ref: "#/components/schemas/CandidateFairness"
+        notes: { type: string }
+        sourceFile: { type: string }
+    CandidateFairness:
+      type: object
+      required: [demographicsAvailable, message]
+      properties:
+        demographicsAvailable: { type: boolean }
+        message: { type: string }
+    CandidateUpdate:
+      type: object
+      properties:
+        status: { type: string }
+        notes: { type: string }
+    ExplainInput:
+      type: object
+      required: [candidateId]
+      properties:
+        candidateId: { type: string }
+    Explanation:
+      type: object
+      required: [candidateId, features, interpretation, mode]
+      properties:
+        candidateId: { type: string }
+        features:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeatureImpact"
+        interpretation: { type: string }
+        mode: { type: string }
+    FeatureImpact:
+      type: object
+      required: [feature, impact, direction]
+      properties:
+        feature: { type: string }
+        impact: { type: number }
+        direction: { type: string }
+    Fairness:
+      type: object
+      required: [demographicsAvailable, message, metrics, groups, mode]
+      properties:
+        demographicsAvailable: { type: boolean }
+        message: { type: string }
+        metrics:
+          type: array
+          items:
+            $ref: "#/components/schemas/FairnessMetric"
+        groups:
+          type: array
+          items:
+            $ref: "#/components/schemas/FairnessGroup"
+        mode: { type: string }
+    FairnessMetric:
+      type: object
+      required: [name, value, interpretation]
+      properties:
+        name: { type: string }
+        value: { type: number }
+        interpretation: { type: string }
+    FairnessGroup:
+      type: object
+      required: [label, selectionRate]
+      properties:
+        label: { type: string }
+        selectionRate: { type: number }
+    ModelMetrics:
+      type: object
+      required: [mode, metrics, confusionMatrix, comparison]
+      properties:
+        mode: { type: string }
+        metrics:
+          type: array
+          items:
+            $ref: "#/components/schemas/Metric"
+        confusionMatrix:
+          type: array
+          items:
+            type: array
+            items: { type: number }
+        comparison:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModelComparison"
+    Metric:
+      type: object
+      required: [name, value]
+      properties:
+        name: { type: string }
+        value: { type: number }
+    ModelComparison:
+      type: object
+      required: [model, f1]
+      properties:
+        model: { type: string }
+        f1: { type: number }

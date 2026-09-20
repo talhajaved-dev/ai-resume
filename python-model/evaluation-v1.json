@@ -1,0 +1,33 @@
+{
+  "modelVersion": "resume-match-logistic-v1",
+  "generatedAt": "2026-09-18T00:00:00.000Z",
+  "split": {
+    "strategy": "deterministic stratified holdout",
+    "seed": 20260918,
+    "testFraction": 0.25,
+    "trainingRecords": 30,
+    "testRecords": 10
+  },
+  "metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "confusionMatrix": [
+    [
+      5,
+      0
+    ],
+    [
+      0,
+      5
+    ]
+  ],
+  "comparison": [
+    {
+      "model": "Trained logistic classifier",
+      "f1": 1.0
+    }
+  ]
+}

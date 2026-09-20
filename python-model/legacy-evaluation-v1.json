@@ -1,0 +1,22 @@
+{
+  "modelVersion": "legacy-demo-benchmark-v1",
+  "generatedAt": "2026-08-27T11:20:00.000Z",
+  "source": "Original website demonstration benchmark",
+  "sampleRecords": 124,
+  "metrics": {
+    "accuracy": 0.855,
+    "precision": 0.818,
+    "recall": 0.783,
+    "f1": 0.8
+  },
+  "confusionMatrix": [
+    [70, 8],
+    [10, 36]
+  ],
+  "comparison": [
+    { "model": "Logistic Regression", "f1": 0.73 },
+    { "model": "SVM", "f1": 0.77 },
+    { "model": "Naive Bayes", "f1": 0.68 },
+    { "model": "Random Forest", "f1": 0.8 }
+  ]
+}
